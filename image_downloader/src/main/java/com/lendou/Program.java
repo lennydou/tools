@@ -14,10 +14,12 @@ public class Program {
     private static final String SEP = "src='http";
     private static final String SPLITTER = "src='";
 
-    private static final String folderName = "/home/dyl/pictures/temp";
+    private static final String folderName = "/home/dyl/pictures/temp_girl";
 
     public static void main( String[] args) {
-        final String url = "";
+        prepareFolder(folderName);
+
+        final String url = "http://cl.mocl.xyz/htm_data/8/1509/1638531.html";
         final List<String> list = downloadUrl(url);
 
         final long curTime = System.currentTimeMillis();
@@ -125,4 +127,12 @@ public class Program {
 
         return new ArrayList<String>();
     }
+
+    private static void prepareFolder(final String folderPath) {
+        final File file = new File(folderPath);
+        if (!file.exists() && !file.isDirectory()) {
+            file.mkdir();
+        }
+    }
 }
+
