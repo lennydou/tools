@@ -28,13 +28,14 @@ public class FileDownloader implements Runnable {
     public void run() {
 
         // 计算本次需要下载的byte大小
-        final int length = fileInfo.getFileSize() - fileInfo.getOffset();
+        // final int length = fileInfo.getFileSize() - fileInfo.getOffset();
+        final int length = 0;
         byte[] data = new byte[length];
 
         BufferedInputStream bis = null;
         try {
             HttpGet httpGet = new HttpGet(fileInfo.getUri());
-            httpGet.addHeader("Range", "bytes=" + fileInfo.getOffset() + "-");
+            // httpGet.addHeader("Range", "bytes=" + fileInfo.getOffset() + "-");
 
             CloseableHttpClient httpClient = HttpClients.createDefault();
             CloseableHttpResponse response = httpClient.execute(httpGet, new BasicHttpContext());

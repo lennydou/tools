@@ -3,57 +3,55 @@ package com.lendou.file.async;
 import org.apache.commons.lang3.Validate;
 
 /**
- * 文件信息类
+ * <b>文件信息类 - FileInfo</b>
+ *
+ * <p>FileInfo保存文件的信息, 包括文件的链接, 文件Id, 文件长度</p>
  */
-class FileInfo {
+public class FileInfo {
     /**
      * 文件下载链接URI
      */
     private String uri;
 
     /**
-     * 文件Id, 用作hashMap的key
-     *
-     * Note: 该值不落硬盘
+     * 文件Id, 必须保证唯一性.
      */
     private String fileId;
 
     /**
-     * 文件名, 用于缓存到本地硬盘
+     * 文件长度
+     */
+    private long fileSize;
+
+    /**
+     * 文件名称<br/>
+     * 用于文件缓存到硬盘时的文件名.
      */
     private String fileName;
 
     /**
-     * 文件长度
+     * 文件切片信息
      */
-    private int fileSize;
-
-    /**
-     * 缓存文件的长度
-     */
-    private int offset;
+    private AsyncFileSliceInfo[] sliceInfos;
 
     /**
      * 构造下载文件的信息
      *
-     * @param uri      文件下载的URI信息
-     * @param fileId   文件唯一Id
-     * @param fileName 缓存到本地硬盘的文件名
+     * @param uri 文件下载的URI信息
+     * @param fileId 文件唯一Id
      * @param fileSize 文件长度
-     * @param offset   缓存文件的长度
      */
-    public FileInfo(String uri, String fileId, String fileName, int fileSize, int offset) {
+    private FileInfo(String uri, String fileId, long fileSize) {
         Validate.notEmpty(uri);
         Validate.notEmpty(fileId);
-        Validate.notEmpty(fileName);
         Validate.isTrue(fileSize > 0);
-        Validate.isTrue(offset >= 0);
 
         this.uri = uri;
         this.fileId = fileId;
-        this.fileName = fileName;
         this.fileSize = fileSize;
-        this.offset = offset;
+
+        this.fileName = FileInfoUtils.generateFileName(fileId);
+        this.sliceInfos = FileInfoUtils.generateFileSliceInfos(fileSize);
     }
 
     /**
@@ -75,20 +73,57 @@ class FileInfo {
     }
 
     /**
-     * 获得文件下载的起始偏移量
-     *
-     * @return 文件下载的起始偏移量
-     */
-    public int getOffset() {
-        return offset;
-    }
-
-    /**
      * 获得文件大小
      *
      * @return 文件大小
      */
-    public int getFileSize() {
+    public long getFileSize() {
         return fileSize;
+    }
+
+    /**
+     * 获得文件名
+     * Note: 该方法可见度是package级别
+     *
+     * @return 文件名
+     */
+    String getFileName() {
+        return fileName;
+    }
+
+    /**
+     * 获得当前文件切片数量
+     *
+     * @return 当前文件切片数量
+     */
+    int getSliceCount() {
+        return sliceInfos.length;
+    }
+
+    /**
+     * 获得文件的第index个切片信息
+     *
+     * @param index 切片下标
+     * @return 第index个切片信息
+     */
+    AsyncFileSliceInfo getSliceInfo(int index) {
+        Validate.isTrue(index >= 0);
+        Validate.isTrue(index < getSliceCount());
+
+        return sliceInfos[index];
+    }
+
+    /**
+     * 构造{@link FileInfo}实例. <br/>
+     * <p>使用该函数构造{@link FileInfo}实例时, offset值默认是0</p>
+     *
+     * @param uri 文件下载链接
+     * @param fileId 文件Id
+     * @param fileSize 文件大小
+     * @return {@link FileInfo}实例
+     * @see FileInfo
+     */
+    public static FileInfo createFileInfo(String uri, String fileId, long fileSize) {
+        return createFileInfo(uri, fileId, fileSize);
     }
 }
