@@ -49,15 +49,15 @@ class FileInfoUtils {
      * @param fileSize 文件大小
      * @return 文件的切片信息
      */
-    public static AsyncFileSliceInfo[] generateFileSliceInfos(long fileSize) {
+    public static AsyncFileSliceInfo[] generateFileSliceInfos(int fileSize) {
         Validate.isTrue(fileSize > 0L);
 
         // 1. 从配置文件中获得每个切片的大小
-        final long unitSize = FileConfig.getFileConfig().getUnitSize();
+        final int unitSize = FileConfig.getFileConfig().getUnitSize();
 
         // 2. 计算需要的切片数量
         int sliceCount = (int) (fileSize / unitSize);
-        final long surplusSize = fileSize % unitSize;
+        final int surplusSize = fileSize % unitSize;
         if (surplusSize > FileConfig.getMinUnitSize()) {
             // 如果最后剩余的部分大于 FileConfig.MinUnitSize, 则其作为一个单独的切片, 否则和上一个切片合并
             ++sliceCount;
@@ -68,9 +68,9 @@ class FileInfoUtils {
 
         // 3.1 先构建 sliceCount - 1 个切片, 留最后一个切片单独处理
         int i = 0;
-        long left = 0;
+        int left = 0;
         for (; i < sliceCount - 1; i++) {
-            long right = left + unitSize;
+            int right = left + unitSize;
             sliceInfos[i] = new AsyncFileSliceInfo(left, right);
             left = right;
         }

@@ -3,12 +3,18 @@ package com.lendou.file.async;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Validate;
 
+import javax.annotation.processing.Completion;
+import java.util.concurrent.*;
+
 /**
  * <b>文件异步下载工具类 - AsyncFileIOUtils</b>
  *
  * <p>提供文件异步下载-回调的接口</p>
  */
 public class AsyncFileIOUtils {
+
+    // TODO: 参数100需要从配置文件中读取
+    private static final ExecutorService executor = Executors.newFixedThreadPool(100);
 
     /**
      * 下载文件内容.<br/>
@@ -21,9 +27,6 @@ public class AsyncFileIOUtils {
         Validate.notNull(fileInfo);
         Validate.notNull(fileHandler);
 
-        // TODO: download file here
-
-        // 调用文件内容
-        fileHandler.handle(fileInfo, ArrayUtils.EMPTY_BYTE_ARRAY);
+        executor.execute(new AsyncFileDownloader(fileInfo, fileHandler));
     }
 }

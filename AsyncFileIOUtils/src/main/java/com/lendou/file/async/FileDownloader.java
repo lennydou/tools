@@ -15,27 +15,17 @@ import java.io.IOException;
 /**
  * 远程文件切片下载器
  */
-public class FileDownloader implements Runnable {
+public class FileDownloader {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileDownloader.class);
 
-    private FileInfo fileInfo;
-
-    public FileDownloader(FileInfo fileInfo) {
-        Validate.notNull(fileInfo);
-        this.fileInfo = fileInfo;
-    }
-
-    public void run() {
+    protected boolean downloadSlice(FileInfo fileInfo, int sliceId) {
 
         // 计算本次需要下载的byte大小
-        // final int length = fileInfo.getFileSize() - fileInfo.getOffset();
-        final int length = 0;
-        byte[] data = new byte[length];
-
+        final AsyncFileSliceInfo sliceInfo = fileInfo.getSliceInfo(sliceId);
         BufferedInputStream bis = null;
         try {
             HttpGet httpGet = new HttpGet(fileInfo.getUri());
-            // httpGet.addHeader("Range", "bytes=" + fileInfo.getOffset() + "-");
+            httpGet.addHeader("Range", "bytes=" + sliceInfo.getCur() + "-" + sliceInfo.getRight());
 
             CloseableHttpClient httpClient = HttpClients.createDefault();
             CloseableHttpResponse response = httpClient.execute(httpGet, new BasicHttpContext());
@@ -43,19 +33,28 @@ public class FileDownloader implements Runnable {
 
             // 从response读取数据写入到data数组中
             // Note: 这里会有多个线程同时写入data数组, 但是每个线程写入到data数组不同的区段, 所以这里不需要加锁.
-            int offset = 0;
+            final byte[] data = fileInfo.getContent();
+            final int length = sliceInfo.getRight() - sliceInfo.getCur();
+            int offset = sliceInfo.getCur();
+
             int bytesRead;
             while ((bytesRead = bis.read(data, offset, length - offset)) != -1) {
                 offset += bytesRead;
-                if (offset == length) {
+                sliceInfo.setCur(offset);
+                if (offset == sliceInfo.getRight()) {
                     break;
                 }
             }
 
-            LOGGER.debug("Success to download file slice {}, {}-{}", fileInfo.getFileId(), fileInfo.getOffset(), length);
+            Validate.isTrue(offset == sliceInfo.getRight());
+
+            LOGGER.info("Success to download file slice {}, {}-{}", fileInfo.getFileId(), sliceInfo.getLeft(), sliceInfo.getRight());
+            return true;
 
         } catch (Throwable e) {
-            LOGGER.error("Failed to download file slice {}, {}-{}", fileInfo.getFileId(), fileInfo.getOffset(), length, e);
+            LOGGER.error("Failed to download file slice {}, {}-{}", fileInfo.getFileId(), sliceInfo.getLeft(), sliceInfo.getRight(), e);
+            return false;
+
         } finally {
             if (bis != null) {
                 try {

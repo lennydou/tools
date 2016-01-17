@@ -22,7 +22,7 @@ public class FileConfig {
     /**
      * 文件切片后每个slice的大小
      */
-    private long unitSize;
+    private int unitSize;
 
     /**
      * 文件下载的timeout时间, 该timeout时间是整个文件所有切片下载的timeout时间
@@ -41,7 +41,7 @@ public class FileConfig {
     /**
      * 获得文件切片后每个slice的大小
      */
-    public long getUnitSize() {
+    public int getUnitSize() {
         return unitSize;
     }
 

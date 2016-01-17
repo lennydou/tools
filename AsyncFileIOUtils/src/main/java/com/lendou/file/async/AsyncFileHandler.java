@@ -1,7 +1,7 @@
 package com.lendou.file.async;
 
 /**
- * Created by dyl on 1/14/16.
+ * 客户端需要实现的文件处理类
  */
 public interface AsyncFileHandler {
 
@@ -11,7 +11,6 @@ public interface AsyncFileHandler {
      * 如果文件下载失败, fileData为空.
      *
      * @param fileInfo 文件信息
-     * @param fileData 文件内容
      */
-    void handle(FileInfo fileInfo, byte[] fileData);
+    void handle(FileInfo fileInfo);
 }

@@ -21,7 +21,7 @@ public class FileInfo {
     /**
      * 文件长度
      */
-    private long fileSize;
+    private int fileSize;
 
     /**
      * 文件名称<br/>
@@ -35,13 +35,18 @@ public class FileInfo {
     private AsyncFileSliceInfo[] sliceInfos;
 
     /**
+     * 文件二进制内容
+     */
+    private volatile byte[] content;
+
+    /**
      * 构造下载文件的信息
      *
      * @param uri 文件下载的URI信息
      * @param fileId 文件唯一Id
      * @param fileSize 文件长度
      */
-    private FileInfo(String uri, String fileId, long fileSize) {
+    private FileInfo(String uri, String fileId, int fileSize) {
         Validate.notEmpty(uri);
         Validate.notEmpty(fileId);
         Validate.isTrue(fileSize > 0);
@@ -77,7 +82,7 @@ public class FileInfo {
      *
      * @return 文件大小
      */
-    public long getFileSize() {
+    public int getFileSize() {
         return fileSize;
     }
 
@@ -98,6 +103,23 @@ public class FileInfo {
      */
     int getSliceCount() {
         return sliceInfos.length;
+    }
+
+    /**
+     * 获得文件内容数组
+     *
+     * @return 文件内容数组
+     */
+    public byte[] getContent() {
+        Validate.notNull(content);
+        return content;
+    }
+
+    /**
+     * 初始化文件内容
+     */
+    public void initContent() {
+        content = new byte[getFileSize()];
     }
 
     /**
@@ -123,7 +145,7 @@ public class FileInfo {
      * @return {@link FileInfo}实例
      * @see FileInfo
      */
-    public static FileInfo createFileInfo(String uri, String fileId, long fileSize) {
-        return createFileInfo(uri, fileId, fileSize);
+    public static FileInfo createFileInfo(String uri, String fileId, int fileSize) {
+        return new FileInfo(uri, fileId, fileSize);
     }
 }

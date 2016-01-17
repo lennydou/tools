@@ -5,28 +5,28 @@ package com.lendou.file.async;
  */
 class AsyncFileSliceInfo {
 
-    private long left;
-    private long cur;
-    private long right;
+    private int left;
+    private int cur;
+    private int right;
 
-    public AsyncFileSliceInfo(long left, long right) {
+    public AsyncFileSliceInfo(int left, int right) {
         this.left = left;
         this.right = right;
     }
 
-    public long getLeft() {
+    public int getLeft() {
         return left;
     }
 
-    public long getCur() {
+    public int getCur() {
         return cur;
     }
 
-    public long getRight() {
+    public int getRight() {
         return right;
     }
 
-    public void setCur(long cur) {
+    public void setCur(int cur) {
         this.cur = cur;
     }
 
