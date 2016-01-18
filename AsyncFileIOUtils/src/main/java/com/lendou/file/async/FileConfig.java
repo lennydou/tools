@@ -53,6 +53,15 @@ public class FileConfig {
     }
 
     /**
+     * 获得重试次数
+     *
+     * @return 重试次数
+     */
+    public int getMaxRetryCount() {
+        return 50;
+    }
+
+    /**
      * 禁用外部通过构造器构造实例
      */
     private FileConfig(Builder builder) {
@@ -91,8 +100,8 @@ public class FileConfig {
     }
 
     public static class Builder {
-        private int unitSize = 64 * 1024;
-        private int timeout = 5 * 60;
+        private int unitSize = 1024 * 1024 * 1024;
+        private int timeout = 10;
 
         private Builder(){}
 

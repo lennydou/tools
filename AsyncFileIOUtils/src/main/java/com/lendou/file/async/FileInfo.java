@@ -36,8 +36,17 @@ public class FileInfo {
 
     /**
      * 文件二进制内容
+     *
+     * Note: 虽然有多个线程会同时操作content, 改写content内容。但是每个线程操作的range是不同的, 所以该变量没有线程安全问题.
      */
     private volatile byte[] content;
+
+    /**
+     * 文件下载是否失败
+     *
+     * Note: 虽然有多个线程会写入并读取该值, 但是由于所有线程对该值的写入都是把该值设置为true, 所以没有强同步需求.
+     */
+    private volatile boolean isFailed = false;
 
     /**
      * 构造下载文件的信息
@@ -116,10 +125,32 @@ public class FileInfo {
     }
 
     /**
+     * 文件下载是否失败
+     *
+     * @return 文件下载是否失败
+     */
+    public boolean isFailed() {
+        return isFailed;
+    }
+
+    /**
+     * 设置当前文件下载失败
+     */
+    public void setFailed() {
+        isFailed = false;
+    }
+
+    /**
      * 初始化文件内容
      */
     public void initContent() {
+        if (content != null && content.length > 0) {
+            // 已经初始化过了, 不想要再初始化
+            return;
+        }
+
         content = new byte[getFileSize()];
+        isFailed = false;
     }
 
     /**

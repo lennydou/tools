@@ -1,15 +1,16 @@
 package com.lendou.file.async;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import sun.net.www.http.HttpClient;
+import org.apache.commons.lang3.Validate;
+import org.apache.http.impl.client.CloseableHttpClient;
+
+import java.util.concurrent.CountDownLatch;
 
 /**
- * 文件片段的下载器
+ * 从文件下载器能够支持线程, 异步执行
  */
-public class AsyncFileSliceDownloader extends FileDownloader implements Runnable {
+public class AsyncFileSliceDownloader implements Runnable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AsyncFileDownloader.class);
+    private CloseableHttpClient httpClient;
 
     // 文件信息
     private FileInfo fileInfo;
@@ -17,18 +18,21 @@ public class AsyncFileSliceDownloader extends FileDownloader implements Runnable
     // 切片编号
     private int sliceId;
 
-    // HttpClient
-    private HttpClient httpClient;
+    private CountDownLatch latch;
 
-    public AsyncFileSliceDownloader(FileInfo fileInfo, int sliceId, HttpClient httpClient) {
+    public AsyncFileSliceDownloader(FileInfo fileInfo, int sliceId, CloseableHttpClient httpClient, CountDownLatch latch) {
+        Validate.notNull(fileInfo);
+        Validate.notNull(httpClient);
+        Validate.notNull(latch);
+
         this.fileInfo = fileInfo;
         this.sliceId = sliceId;
         this.httpClient = httpClient;
+        this.latch = latch;
     }
 
     public void run() {
-        final int maxRetry = 10;
-        int i = 0;
-        while (i++ < maxRetry && !downloadSlice(fileInfo, sliceId));
+        FileDownloadHelper.downloadSlice(fileInfo, sliceId, httpClient);
+        latch.countDown();
     }
 }

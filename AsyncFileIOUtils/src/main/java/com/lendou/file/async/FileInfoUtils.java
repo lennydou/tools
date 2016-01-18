@@ -56,7 +56,7 @@ class FileInfoUtils {
         final int unitSize = FileConfig.getFileConfig().getUnitSize();
 
         // 2. 计算需要的切片数量
-        int sliceCount = (int) (fileSize / unitSize);
+        int sliceCount = fileSize / unitSize;
         final int surplusSize = fileSize % unitSize;
         if (surplusSize > FileConfig.getMinUnitSize()) {
             // 如果最后剩余的部分大于 FileConfig.MinUnitSize, 则其作为一个单独的切片, 否则和上一个切片合并
