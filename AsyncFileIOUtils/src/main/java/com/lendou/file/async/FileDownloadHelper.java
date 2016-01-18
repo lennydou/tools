@@ -113,6 +113,14 @@ class FileDownloadHelper {
                     LOGGER.error("Failed to close response", e);
                 }
             }
+
+            if (httpClient != null) {
+                try {
+                    httpClient.close();
+                } catch (IOException e) {
+                    LOGGER.error("Failed to close httpClient", e);
+                }
+            }
         }
 
         return sliceInfo.isCompleted();
