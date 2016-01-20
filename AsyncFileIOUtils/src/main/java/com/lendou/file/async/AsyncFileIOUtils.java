@@ -25,14 +25,14 @@ public class AsyncFileIOUtils {
      * 下载文件内容.<br/>
      * 文件下载完成后, 该方法会调用{@link AsyncFileHandler}的handle方法.
      *
-     * @param fileInfo 文件内容
+     * @param fileContext 文件内容
      * @param fileHandler 文件下载完成后的回调方法
      */
-    public static void download(FileInfo fileInfo, AsyncFileHandler fileHandler) {
-        Validate.notNull(fileInfo);
+    public static void download(FileContext fileContext, AsyncFileHandler fileHandler) {
+        Validate.notNull(fileContext);
         Validate.notNull(fileHandler);
 
-        AsyncFileDownloader.download(fileInfo, fileHandler);
+        AsyncFileDownloader.download(fileContext, fileHandler);
     }
 
     public static int getFileSize(String uri) {

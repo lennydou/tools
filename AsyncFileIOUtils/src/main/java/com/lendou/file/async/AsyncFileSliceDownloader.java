@@ -13,26 +13,26 @@ public class AsyncFileSliceDownloader implements Runnable {
     private CloseableHttpClient httpClient;
 
     // 文件信息
-    private FileInfo fileInfo;
+    private FileContext fileContext;
 
     // 切片编号
     private int sliceId;
 
     private CountDownLatch latch;
 
-    public AsyncFileSliceDownloader(FileInfo fileInfo, int sliceId, CloseableHttpClient httpClient, CountDownLatch latch) {
-        Validate.notNull(fileInfo);
+    public AsyncFileSliceDownloader(FileContext fileContext, int sliceId, CloseableHttpClient httpClient, CountDownLatch latch) {
+        Validate.notNull(fileContext);
         Validate.notNull(httpClient);
         Validate.notNull(latch);
 
-        this.fileInfo = fileInfo;
+        this.fileContext = fileContext;
         this.sliceId = sliceId;
         this.httpClient = httpClient;
         this.latch = latch;
     }
 
     public void run() {
-        FileDownloadHelper.downloadSlice(fileInfo, sliceId, httpClient);
+        FileDownloadHelper.downloadSlice(fileContext, sliceId, httpClient);
         latch.countDown();
     }
 }

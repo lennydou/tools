@@ -2,12 +2,9 @@ package com.lendou.file.async.test;
 
 import com.lendou.file.async.AsyncFileHandler;
 import com.lendou.file.async.AsyncFileIOUtils;
-import com.lendou.file.async.FileInfo;
+import com.lendou.file.async.FileContext;
 import com.lendou.file.async.Stat;
-import org.apache.commons.io.FileUtils;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TestFileHandler implements AsyncFileHandler {
@@ -20,14 +17,15 @@ public class TestFileHandler implements AsyncFileHandler {
         this.count = new AtomicInteger(count);
     }
 
-    public void handle(FileInfo fileInfo) {
-        System.out.println("in fileHandler: " + fileInfo.getContent().length);
+    public void handle(FileContext fileContext) {
+        System.out.println("in fileHandler: " + fileContext.getContent().length);
 
-        try {
-            FileUtils.writeByteArrayToFile(new File("/home/dyl/pictures/test/data_" + fileInfo.getFileId()), fileInfo.getContent());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            FileUtils.writeByteArrayToFile(new File("/home/dyl/pictures/test/data_" + fileInfo.getFileId()), fileInfo.getContent());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+        System.out.println("Download file " + fileContext.getFileId() + " " + fileContext.isFailed());
 
         System.out.println("time: " + (System.currentTimeMillis() - start));
         if (count.decrementAndGet() == 0) {

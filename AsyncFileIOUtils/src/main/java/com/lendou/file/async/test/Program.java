@@ -1,7 +1,7 @@
 package com.lendou.file.async.test;
 
 import com.lendou.file.async.AsyncFileIOUtils;
-import com.lendou.file.async.FileInfo;
+import com.lendou.file.async.FileContext;
 import com.lendou.file.async.Stat;
 
 /**
@@ -17,14 +17,14 @@ public class Program {
 
     public static void main(String[] args) {
         Stat.start();
-        FileInfo fileInfo1 = FileInfo.createFileInfo(url1, "file1", AsyncFileIOUtils.getFileSize(url1));
+        FileContext fileContext1 = FileContext.createFileInfo(url1, "file1", AsyncFileIOUtils.getFileSize(url1));
 //        FileInfo fileInfo2 = FileInfo.createFileInfo(url2, "file2", AsyncFileIOUtils.getFileSize(url2));
 //        FileInfo fileInfo3 = FileInfo.createFileInfo(url3, "file3", AsyncFileIOUtils.getFileSize(url3));
-        System.out.println(fileInfo1.getFileSize());
+        System.out.println(fileContext1.getFileSize());
 //        System.out.println(fileInfo2.getFileSize());
 //        System.out.println(fileInfo3.getFileSize());
 
-        AsyncFileIOUtils.download(fileInfo1, fileHandler);
+        AsyncFileIOUtils.download(fileContext1, fileHandler);
 //        AsyncFileIOUtils.download(fileInfo2, fileHandler);
 //        AsyncFileIOUtils.download(fileInfo3, fileHandler);
     }

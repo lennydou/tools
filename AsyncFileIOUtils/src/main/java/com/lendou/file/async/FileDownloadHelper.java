@@ -25,23 +25,23 @@ class FileDownloadHelper {
      *
      * @return 文件切片是否下载完成
      */
-    public static void downloadSlice(FileInfo fileInfo, int sliceId, CloseableHttpClient httpClient) {
+    public static void downloadSlice(FileContext fileContext, int sliceId, CloseableHttpClient httpClient) {
 
         for (int i = 0; i < FileConfig.getFileConfig().getMaxRetryCount(); i++) {
-            if (fileInfo.isFailed()) {
-                LOGGER.error("File {} is failed, will skip download for slice {}", fileInfo.getUri(), sliceId);
-                System.out.println(String.format("File %s is failed, will skip download for slice %s", fileInfo.getUri(), sliceId));
+            if (fileContext.isFailed()) {
+                LOGGER.error("File {} is failed, will skip download for slice {}", fileContext.getUri(), sliceId);
+                System.out.println(String.format("File %s is failed, will skip download for slice %s", fileContext.getUri(), sliceId));
                 break;
             }
 
             // 记录重试的日志
             if (i > 0) {
-                LOGGER.warn("Download file {} slice {}, with retry {}", fileInfo.getUri(), sliceId);
-                System.out.println(String.format("Download file %s slice %s, with retry %s", fileInfo.getUri(), sliceId, i));
+                LOGGER.warn("Download file {} slice {}, with retry {}", fileContext.getUri(), sliceId);
+                System.out.println(String.format("Download file %s slice %s, with retry %s", fileContext.getUri(), sliceId, i));
             }
 
             // 如果下载完成, 直接跳出循环; 否则继续重试去下载
-            if (downloadSliceInternal(fileInfo, sliceId, httpClient)) {
+            if (downloadSliceInternal(fileContext, sliceId, httpClient)) {
                 break;
             }
         }
@@ -52,9 +52,9 @@ class FileDownloadHelper {
      *
      * @return 文件切片是否下载完成
      */
-    private static boolean downloadSliceInternal(FileInfo fileInfo, int sliceId, CloseableHttpClient httpClient) {
-        final AsyncFileSliceInfo sliceInfo = fileInfo.getSliceInfo(sliceId);
-        if (fileInfo.isFailed()) {
+    private static boolean downloadSliceInternal(FileContext fileContext, int sliceId, CloseableHttpClient httpClient) {
+        final AsyncFileSliceInfo sliceInfo = fileContext.getSliceInfo(sliceId);
+        if (fileContext.isFailed()) {
             return sliceInfo.isCompleted();
         }
 
@@ -63,9 +63,9 @@ class FileDownloadHelper {
         BufferedInputStream bis = null;
         try {
             //设置请求和传输超时时间
-            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(5000).setConnectTimeout(5000).build();
+            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(5000).setConnectTimeout(5000).setConnectionRequestTimeout(5000).build();
 
-            HttpGet httpGet = new HttpGet(fileInfo.getUri());
+            HttpGet httpGet = new HttpGet(fileContext.getUri());
             httpGet.setConfig(requestConfig);
             httpGet.addHeader("Range", "bytes=" + sliceInfo.getCur() + "-" + sliceInfo.getRight());
             System.out.println(String.format("Download file range from %d to %d", sliceInfo.getCur(), sliceInfo.getRight()));
@@ -75,7 +75,7 @@ class FileDownloadHelper {
 
             // 从response读取数据写入到data数组中
             // Note: 这里会有多个线程同时写入data数组, 但是每个线程写入到data数组不同的区段, 所以这里不需要加锁.
-            final byte[] data = fileInfo.getContent();
+            final byte[] data = fileContext.getContent();
             final int length = sliceInfo.getRight() - sliceInfo.getCur();
             int offset = sliceInfo.getCur();
 
@@ -90,12 +90,13 @@ class FileDownloadHelper {
             }
 
             Validate.isTrue(sliceInfo.isCompleted());
-            LOGGER.info("Success to download file slice {}, {}-{}", fileInfo.getFileId(), sliceInfo.getLeft(), sliceInfo.getRight());
-            System.out.println(String.format("Success to download file slice %s, %s-%s", fileInfo.getFileId(), sliceInfo.getLeft(), sliceInfo.getRight()));
+            LOGGER.info("Success to download file slice {}, {}-{}", fileContext.getFileId(), sliceInfo.getLeft(), sliceInfo.getRight());
+            System.out.println(String.format("Success to download file slice %s, %s-%s", fileContext.getFileId(), sliceInfo.getLeft(), sliceInfo.getRight()));
 
         } catch (Throwable e) {
-            LOGGER.warn("Failed to download file slice {}, {}-{}", fileInfo.getFileId(), sliceInfo.getLeft(), sliceInfo.getRight(), e);
-            System.out.println(String.format("Failed to download file slice %s, %s-%s", fileInfo.getFileId(), sliceInfo.getLeft(), sliceInfo.getRight()));
+            LOGGER.warn("Failed to download file slice {}, {}-{}", fileContext.getFileId(), sliceInfo.getLeft(), sliceInfo.getRight(), e);
+            System.out.println(String.format("Failed to download file slice %s, %s-%s", fileContext.getFileId(), sliceInfo.getLeft(), sliceInfo.getRight()));
+            e.printStackTrace();
 
         } finally {
             if (bis != null) {
@@ -111,14 +112,6 @@ class FileDownloadHelper {
                     response.close();
                 } catch (IOException e) {
                     LOGGER.error("Failed to close response", e);
-                }
-            }
-
-            if (httpClient != null) {
-                try {
-                    httpClient.close();
-                } catch (IOException e) {
-                    LOGGER.error("Failed to close httpClient", e);
                 }
             }
         }

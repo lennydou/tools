@@ -10,7 +10,7 @@ public interface AsyncFileHandler {
      *
      * 如果文件下载失败, fileData为空.
      *
-     * @param fileInfo 文件信息
+     * @param fileContext 文件信息
      */
-    void handle(FileInfo fileInfo);
+    void handle(FileContext fileContext);
 }

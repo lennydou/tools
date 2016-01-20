@@ -12,15 +12,15 @@ import java.util.concurrent.ConcurrentHashMap;
 public class FileInfoHolder {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileInfoHolder.class);
 
-    private static ConcurrentHashMap<String, FileInfo> fileInfoMap = new ConcurrentHashMap<String, FileInfo>();
+    private static ConcurrentHashMap<String, FileContext> fileInfoMap = new ConcurrentHashMap<String, FileContext>();
 
-    public static FileInfo getFileInfo(String fileId) {
+    public static FileContext getFileInfo(String fileId) {
         Validate.notEmpty(fileId);
         return fileInfoMap.get(fileId);
     }
 
-    public static void addFileInfo(FileInfo fileInfo) {
-        Validate.notNull(fileInfo);
-        fileInfoMap.putIfAbsent(fileInfo.getFileId(), fileInfo);
+    public static void addFileInfo(FileContext fileContext) {
+        Validate.notNull(fileContext);
+        fileInfoMap.putIfAbsent(fileContext.getFileId(), fileContext);
     }
 }

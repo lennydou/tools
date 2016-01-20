@@ -5,7 +5,7 @@ package com.lendou.file.async;
  */
 public class FileHandler implements AsyncFileHandler {
 
-    public void handle(FileInfo fileInfo) {
+    public void handle(FileContext fileContext) {
         System.out.println("Called in FileHandler");
     }
 }
