@@ -1,0 +1,14 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <!--
+     lazy-init=true, 那么Bean将在第一次 context.getBean 的时候创建, 根据参数选择不同的构造函数; 否则在程序启动的时候创建
+     init-method, 创建一个bean实例, 调用一次init-method
+     scope: 如果是singleton, 那么该bean是单例模式; 如果是prototype, 则是每次调用getBean都会单独创建一个bean实例
+     -->
+    <bean id="helloBean" class="com.lendou.test.HelloWorld" lazy-init="true" destroy-method="destroy" init-method="init" scope="prototype">
+        <property name="name" value="lenny dou" />
+    </bean>
+</beans>
