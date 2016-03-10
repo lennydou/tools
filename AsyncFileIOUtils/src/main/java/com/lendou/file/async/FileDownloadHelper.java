@@ -76,7 +76,7 @@ class FileDownloadHelper {
             // 从response读取数据写入到data数组中
             // Note: 这里会有多个线程同时写入data数组, 但是每个线程写入到data数组不同的区段, 所以这里不需要加锁.
             final byte[] data = fileContext.getContent();
-            final int length = sliceInfo.getRight() - sliceInfo.getCur();
+            final int length = sliceInfo.getRight();
             int offset = sliceInfo.getCur();
 
             int bytesRead;
