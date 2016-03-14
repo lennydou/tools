@@ -1,12 +1,10 @@
 package com.lendou;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.RandomStringUtils;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.File;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -20,6 +18,8 @@ public class AESCoder {
     /**
      * 加密解密算法/工作模式/填充方式
      * Java6支持PKCS5Padding填充方式
+     *
+     * 貌似JDK只支持 AES 的 ECB 工作模式
      */
     public static final String CIPHER_ALGORITHM = "AES/ECB/PKCS5Padding";
 
