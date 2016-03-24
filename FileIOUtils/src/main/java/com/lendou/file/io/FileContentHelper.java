@@ -80,7 +80,6 @@ class FileContentHelper {
         try {
             //设置请求和传输超时时间
             httpGet.setHeader(HEADER_RANGE, "bytes=" + fileContext.getOffset() + "-" + fileContext.getFileSize());
-            System.out.println(String.format("Download file range from %d to %d", fileContext.getOffset(), fileContext.getFileSize()));
 
             // 拿到返回对象response, 并验证response的返回值
             response = httpClient.execute(httpGet);

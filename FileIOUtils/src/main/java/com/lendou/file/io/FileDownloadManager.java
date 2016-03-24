@@ -5,34 +5,51 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 /**
- * <b>文件下载工具类 - FileIOUtils</b>
+ * <b>文件下载工具类 - FileDownloadManager</b>
  */
 public class FileDownloadManager {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileDownloadManager.class);
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(FileDownloadManager.class);
 
-    private static FileConfig fileConfig = FileConfig.DEFAULT;
-    private static RequestConfig reqConfig = RequestConfig.DEFAULT;
+    private static final Object LOCK = new Object();
+    private static FileDownloadManager instance;
 
-    private static CloseableHttpClient httpClient;
+    public static FileDownloadManager getInstance() {
+        if (instance == null) {
+            synchronized (LOCK) {
+                if (instance == null) {
+                    instance = new FileDownloadManager();
+                    instance.init();
+                }
+            }
+        }
 
-    static {
-        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-        cm.setMaxTotal(fileConfig.getMaxTotalConnections());
-        cm.setDefaultMaxPerRoute(fileConfig.getMaxPerRoute());
-
-        httpClient = HttpClients.custom().setConnectionManager(cm).build();
+        return instance;
     }
 
-    public static void setFileConfig(FileConfig config) {
+    private FileConfig fileConfig = FileConfig.DEFAULT;
+    private RequestConfig reqConfig = RequestConfig.DEFAULT;
+
+    private CloseableHttpClient httpClient;
+
+    private void init() {
+        PoolingHttpClientConnectionManager connMgr = new PoolingHttpClientConnectionManager();
+        connMgr.setMaxTotal(fileConfig.getMaxTotalConnections());
+        connMgr.setDefaultMaxPerRoute(fileConfig.getMaxPerRoute());
+
+        httpClient = HttpClients.custom().setConnectionManager(connMgr).build();
+    }
+
+    public void setFileConfig(FileConfig config) {
         Validate.notNull(config);
         fileConfig = config;
     }
 
-    public static void setDefaultReqConfig(RequestConfig requestConfig) {
+    public void setDefaultReqConfig(RequestConfig requestConfig) {
         reqConfig = requestConfig;
     }
 
@@ -42,9 +59,21 @@ public class FileDownloadManager {
      *
      * @param fileContext 文件上下文
      */
-    public static void download(FileContext fileContext) {
+    public void download(FileContext fileContext) {
         Validate.notNull(fileContext);
-
         FileContentHelper.download(httpClient, fileConfig, reqConfig, fileContext);
+    }
+
+    /**
+     * 关闭连接池
+     */
+    public void shutdown() {
+        if (httpClient != null) {
+            try {
+                httpClient.close();
+            } catch (IOException e) {
+                LOGGER.error("Failed to close http client", e);
+            }
+        }
     }
 }
