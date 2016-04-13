@@ -15,6 +15,8 @@ public class Program {
 
     public static void main(String[] args) throws IOException {
         download(getSize());
+
+        System.exit(0);
     }
 
     public static void download(int fileSize) throws IOException {
