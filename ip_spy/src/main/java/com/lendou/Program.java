@@ -24,7 +24,7 @@ public class Program {
         String lastIP = StringUtils.EMPTY;
         while (true) {
             String curIP = getIP();
-            if (StringUtils.equals(lastIP, curIP)) {
+            if (StringUtils.isBlank(curIP) || StringUtils.equals(lastIP, curIP)) {
                 continue;
             }
 
@@ -79,8 +79,8 @@ public class Program {
                 }
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Throwable e) {
+
         } finally {
             if (httpConn != null) {
                 httpConn.disconnect();
