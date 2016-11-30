@@ -1,0 +1,136 @@
+1. 配置文件
+# Log4J配置文件的基本格式如下:
+# 配置根Logger
+# log4j.rootLogger  =   [ level ]   ,  appenderName1 ,  appenderName2 ,  …
+#
+# 配置日志信息输出目的地Appender
+# log4j.appender.appenderName  =  fully.qualified.name.of.appender.class
+#　log4j.appender.appenderName.option1  =  value1
+#　…
+#　log4j.appender.appenderName.optionN  =  valueN
+#
+# 配置日志信息的格式（布局）
+# log4j.appender.appenderName.layout  =  fully.qualified.name.of.layout.class
+#　log4j.appender.appenderName.layout.option1  =  value1
+#　…
+#　log4j.appender.appenderName.layout.optionN  =  valueN
+
+###############################################################################
+# [Level] 是日志输出级别, 共有5级:
+# FATAL  0
+# ERROR  3
+# WARN   4
+# INFO   6
+# DEBUG  7
+
+###############################################################################
+# [Appender] 为日志输出目的地, Log4j提供的appender有以下几种
+# org.apache.log4j.ConsoleAppender          控制台
+# org.apache.log4j.FileAppender             文件
+# org.apache.log4j.DailyRollingFileAppender 每天产生一个日志文件
+# org.apache.log4j.RollingFileAppender      文件大小到达指定尺寸的时候产生一个新的文件
+# org.apache.log4j.WriterAppender           将日志信息以流格式发送到任意指定的地方
+
+###############################################################################
+# [Layout]: 日志输出格式, Log4j提供的layout有以下几种:
+# org.apache.log4j.HTMLLayout    以HTML表格形式布局
+# org.apache.log4j.PatternLayout 可以灵活地指定布局模式
+# org.apache.log4j.SimpleLayout  包含日志信息的级别和信息字符串
+# org.apache.log4j.TTCCLayout    包含日志产生的时间、线程、类别等等信息
+
+###############################################################################
+# [打印参数]: Log4J采用类似C语言中的printf函数的打印格式格式化日志信息, 如下:
+ -X号: X信息输出时左对齐；
+ %p: 输出日志信息优先级，即DEBUG，INFO，WARN，ERROR，FATAL,
+ %d: 输出日志时间点的日期或时间，默认格式为ISO8601，也可以在其后指定格式，比如：%d{yyy MMM dd HH:mm:ss,SSS}，输出类似：2002年10月18日 22：10：28，921
+ %r: 输出自应用启动到输出该log信息耗费的毫秒数
+ %c: 输出日志信息所属的类目，通常就是所在类的全名
+ %t: 输出产生该日志事件的线程名
+ %l: 输出日志事件的发生位置，相当于%C.%M(%F:%L)的组合,包括类目名、发生的线程，以及在代码中的行数。举例：Testlog4.main (TestLog4.java:10)
+ %x: 输出和当前线程相关联的NDC(嵌套诊断环境),尤其用到像java servlets这样的多客户多线程的应用中。
+ %%: 输出一个"%"字符
+ %F: 输出日志消息产生时所在的文件名称
+ %L: 输出代码中的行号
+ %m: 输出代码中指定的消息,产生的日志具体信息
+ %n: 输出一个回车换行符，Windows平台为"/r/n"，Unix平台为"/n"输出日志信息换行
+
+ 1)%20c：指定输出category的名称，最小的宽度是20，如果category的名称小于20的话，默认的情况下右对齐。
+ 2)%-20c:指定输出category的名称，最小的宽度是20，如果category的名称小于20的话，"-"号指定左对齐。
+ 3)%.30c:指定输出category的名称，最大的宽度是30，如果category的名称大于30的话，就会将左边多出的字符截掉，但小于30的话也不会有空格。
+ 4)%20.30c:如果category的名称小于20就补空格，并且右对齐，如果其名称长于30字符，就从左边较远输出的字符截掉。
+
+
+2. 在代码中初始化Logger:
+a 在程序中调用BasicConfigurator.configure()方法: 给根记录器增加一个ConsoleAppender, 输出格式通过PatternLayout设为"%-4r [%t] %-5p %c %x - %m%n"，还有根记录器的默认级别是Level.DEBUG.
+b 配置放在文件里, 通过命令行参数传递文件名字, 通过PropertyConfigurator.configure(args[x])解析并配置;
+c 配置放在文件里, 通过环境变量传递文件名等信息, 利用log4j默认的初始化过程解析并配置;
+d 配置放在文件里, 通过应用服务器配置传递文件名等信息, 利用一个特殊的servlet来完成配置.
+
+
+3. 为不同的 Appender 设置日志输出级别:
+当调试系统时, 我们往往注意的只是异常级别的日志输出, 但是通常所有级别的输出都是放在一个文件里的, 如果日志输出的级别是BUG!?那就慢慢去找吧.
+这时我们也许会想要是能把异常信息单独输出到一个文件里该多好啊. 当然可以, Log4j已经提供了这样的功能, 我们只需要在配置中修改Appender的Threshold就能实现,比如下面的例子:
+[配置文件]
+  ### set log levels ###
+log4j.rootLogger = debug ,  stdout ,  D ,  E
+
+### 输出到控制台 ###
+log4j.appender.stdout = org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.Target = System.out
+log4j.appender.stdout.layout = org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern =  %d{ABSOLUTE} %5p %c{ 1 }:%L - %m%n
+
+### 输出到日志文件 ###
+log4j.appender.D = org.apache.log4j.DailyRollingFileAppender
+log4j.appender.D.File = logs/log.log
+log4j.appender.D.Append = true
+log4j.appender.D.Threshold = DEBUG ## 输出DEBUG级别以上的日志
+log4j.appender.D.layout = org.apache.log4j.PatternLayout
+log4j.appender.D.layout.ConversionPattern = %-d{yyyy-MM-dd HH:mm:ss}  [ %t:%r ] - [ %p ]  %m%n
+
+### 保存异常信息到单独文件 ###
+log4j.appender.D = org.apache.log4j.DailyRollingFileAppender
+log4j.appender.D.File = logs/error.log ## 异常日志文件名
+log4j.appender.D.Append = true
+log4j.appender.D.Threshold = ERROR ## 只输出ERROR级别以上的日志!!!
+log4j.appender.D.layout = org.apache.log4j.PatternLayout
+log4j.appender.D.layout.ConversionPattern = %-d{yyyy-MM-dd HH:mm:ss}  [ %t:%r ] - [ %p ]  %m%n
+
+[代码中使用]
+  public   class  TestLog4j  {
+     public   static   void  main(String[] args)  {
+        PropertyConfigurator.configure( " D:/Code/conf/log4j.properties " );
+        Logger logger  =  Logger.getLogger(TestLog4j. class );
+        logger.debug( " debug " );
+        logger.error( " error " );
+    }
+ }
+
+
+4. 不同的包(package)下的日志写入到不同的日志文件下
+# Set root category priority to DEBUG and its only appender to A1.
+#log4j.rootCategory=DEBUG, A1
+#log4j.rootCategory=info, stdout,f1
+
+#com.action包下的类
+log4j.logger.com.action=info,action
+
+#com.filter包下的类
+log4j.logger.com.filter=info,filter
+
+###### DAO Logger ###############
+log4j.appender.action=org.apache.log4j.RollingFileAppender
+log4j.appender.action.File=../logs/action.log
+log4j.appender.action.MaxFileSize=1024KB
+log4j.appender.action.MaxBackupIndex=5
+log4j.appender.action.Append=true
+log4j.appender.action.layout=org.apache.log4j.HTMLLayout
+log4j.appender.action.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss,SSS} [%c]-[%p] %m%n
+
+log4j.appender.filter=org.apache.log4j.RollingFileAppender
+log4j.appender.filter.File=../logs/filter.log
+log4j.appender.filter.MaxFileSize=1024KB
+log4j.appender.filter.MaxBackupIndex=5
+log4j.appender.filter.Append=true
+log4j.appender.filter.layout=org.apache.log4j.HTMLLayout
+log4j.appender.filter.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss,SSS} [%c]-[%p] %m%n

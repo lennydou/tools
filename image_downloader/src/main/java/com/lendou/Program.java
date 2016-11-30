@@ -14,12 +14,12 @@ public class Program {
     private static final String SEP = "src='http";
     private static final String SPLITTER = "src='";
 
-    private static final String folderName = "/home/dyl/pictures/temp_51_beautiful";
+    private static final String folderName = "/Users/dyl/Pictures";
 
     public static void main( String[] args) {
         prepareFolder(folderName);
 
-        final String url = "http://cl.bacl.biz/htm_data/7/1602/1852166.html";
+        final String url = "http://dz.d7w.biz/htm_data/7/1610/2101266.html";
         final List<String> list = downloadUrl(url);
 
         final long curTime = System.currentTimeMillis();
